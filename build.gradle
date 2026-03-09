@@ -71,7 +71,7 @@ validateNebulaPom.enabled = false
 buildscript {
     ext {
         opensearch_version = System.getProperty("opensearch.version", "3.5.0")
-        lucene_version = "9.7.0"
+        lucene_version = "10.3.2"
         morfologik_version = "2.1.9"
     }
 
@@ -94,6 +94,12 @@ repositories {
     maven { url "https://plugins.gradle.org/m2/" }
 }
 
+configurations.configureEach {
+    resolutionStrategy {
+        force "com.google.errorprone:error_prone_annotations:${versions.error_prone_annotations}"
+    }
+}
+
 dependencies {
     implementation "org.apache.lucene:lucene-analysis-morfologik:${lucene_version}"
     implementation "org.carrot2:morfologik-stemming:${morfologik_version}"
@@ -105,7 +111,7 @@ test {
     include '**/*Tests.class'
 }
 
-task integTest(type: RestIntegTestTask) {
+tasks.register('integTest', RestIntegTestTask) {
     description = "Run tests against a cluster"
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
@@ -131,12 +137,12 @@ run {
 }
 
 // updateVersion: Task to auto update version to the next development iteration
-task updateVersion {
+tasks.register('updateVersion') {
     onlyIf { System.getProperty('newVersion') }
     doLast {
         ext.newVersion = System.getProperty('newVersion')
         println "Setting version to ${newVersion}."
         // String tokenization to support -SNAPSHOT
-        ant.replaceregexp(file:'build.gradle', match: '"opensearch.version", "\\d.*"', replace: '"opensearch.version", "' + newVersion.tokenize('-')[0] + '-SNAPSHOT"', flags:'g', byline:true)
+        ant.replaceregexp(file: 'build.gradle', match: '"opensearch.version", "\\d.*"', replace: '"opensearch.version", "' + newVersion.tokenize('-')[0] + '-SNAPSHOT"', flags: 'g', byline: true)
     }
 }
