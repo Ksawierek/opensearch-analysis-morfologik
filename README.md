@@ -42,6 +42,11 @@ The plugin registers two analysis components:
 | Analyzer       | `morfologik`      | Full analyzer: tokenizer + lowercase + stemming  |
 | Token filter   | `morfologik_stem` | Stemming filter only, for custom analyzer chains |
 
+**When to use which:**
+
+- Use **`morfologik`** (analyzer) as a drop-in solution when you only need Polish lemmatization with no other customization. It internally uses `StandardTokenizer → LowerCaseFilter → MorfologikFilter`.
+- Use **`morfologik_stem`** (token filter) when you need to combine lemmatization with other filters — e.g. synonym expansion, stop words, or ASCII folding. Build a `custom` analyzer and place `morfologik_stem` at the end of the filter chain, after `lowercase`.
+
 ### morfologik analyzer
 
 ```json
@@ -110,12 +115,34 @@ directory and reference the `.dict` file via the `dictionary` parameter:
 
 ### Test analysis via API
 
+Using `curl` against a running OpenSearch instance:
+
 ```bash
-POST /my-index/_analyze
-{
-  "analyzer": "morfologik",
-  "text": "szybkich kotów"
-}
+# Create index with morfologik analyzer
+curl -X PUT "localhost:9200/my-index" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "settings": {
+      "analysis": {
+        "analyzer": {
+          "polish": { "type": "morfologik" }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "content": { "type": "text", "analyzer": "polish" }
+      }
+    }
+  }'
+
+# Test lemmatization
+curl -X POST "localhost:9200/my-index/_analyze" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analyzer": "polish",
+    "text": "szybkich kotów"
+  }'
 ```
 
 Expected output contains lemmas: `szybki`, `kot`.

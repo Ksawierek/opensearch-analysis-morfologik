@@ -6,3 +6,77 @@
 
   - match:
       $body: /^opensearch-analysis-morfologik\n$/
+
+---
+"Test morfologik analyzer lemmatizes genitive plural noun":
+  - do:
+      indices.create:
+        index: morfologik-test
+        body:
+          settings:
+            analysis:
+              analyzer:
+                polish:
+                  type: morfologik
+  - do:
+      indices.analyze:
+        index: morfologik-test
+        body:
+          analyzer: polish
+          text: "kotów"
+  - match: { tokens.0.token: "kot" }
+
+  - do:
+      indices.delete:
+        index: morfologik-test
+
+---
+"Test morfologik analyzer lemmatizes verb form":
+  - do:
+      indices.create:
+        index: morfologik-verb-test
+        body:
+          settings:
+            analysis:
+              analyzer:
+                polish:
+                  type: morfologik
+  - do:
+      indices.analyze:
+        index: morfologik-verb-test
+        body:
+          analyzer: polish
+          text: "biegam"
+  - match: { tokens.0.token: "biegać" }
+
+  - do:
+      indices.delete:
+        index: morfologik-verb-test
+
+---
+"Test morfologik_stem filter in custom analyzer chain":
+  - do:
+      indices.create:
+        index: morfologik-stem-test
+        body:
+          settings:
+            analysis:
+              analyzer:
+                polish_custom:
+                  type: custom
+                  tokenizer: standard
+                  filter: [lowercase, polish_stem]
+              filter:
+                polish_stem:
+                  type: morfologik_stem
+  - do:
+      indices.analyze:
+        index: morfologik-stem-test
+        body:
+          analyzer: polish_custom
+          text: "kotów"
+  - match: { tokens.0.token: "kot" }
+
+  - do:
+      indices.delete:
+        index: morfologik-stem-test

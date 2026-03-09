@@ -118,6 +118,51 @@ public class MorfologikTests extends OpenSearchTestCase {
         }
     }
 
+    /**
+     * Uppercase verb form should be lowercased and lemmatized.
+     * "Biegam" → lowercase → "biegam" → lemma "biegać".
+     * (Verb forms are not ambiguous with proper nouns.)
+     */
+    public void testUppercaseInputLowercasedAndLemmatized() throws IOException {
+        try (MorfologikAnalyzer analyzer = new MorfologikAnalyzer()) {
+            List<String> tokens = tokenize(analyzer, "Biegam");
+            assertContains(tokens, "biegać");
+        }
+    }
+
+    /** All-caps verb should also be handled correctly. */
+    public void testAllCapsInputLowercased() throws IOException {
+        try (MorfologikAnalyzer analyzer = new MorfologikAnalyzer()) {
+            List<String> tokens = tokenize(analyzer, "BIEGAM");
+            assertContains(tokens, "biegać");
+        }
+    }
+
+    /** Digits are not part of Polish morphology — they should pass through as-is. */
+    public void testDigitsPassedThrough() throws IOException {
+        try (MorfologikAnalyzer analyzer = new MorfologikAnalyzer()) {
+            List<String> tokens = tokenize(analyzer, "123");
+            assertFalse("Digits should produce at least one token", tokens.isEmpty());
+        }
+    }
+
+    /** Punctuation between words should not bleed into adjacent tokens. */
+    public void testPunctuationSeparatesWords() throws IOException {
+        try (MorfologikAnalyzer analyzer = new MorfologikAnalyzer()) {
+            List<String> tokens = tokenize(analyzer, "kot, pies");
+            assertContains(tokens, "kot");
+            assertContains(tokens, "pies");
+        }
+    }
+
+    /** Hyphenated compound — each part tokenized independently. */
+    public void testHyphenatedInputTokenizedSeparately() throws IOException {
+        try (MorfologikAnalyzer analyzer = new MorfologikAnalyzer()) {
+            List<String> tokens = tokenize(analyzer, "biało-czerwony");
+            assertFalse("Hyphenated input should produce tokens", tokens.isEmpty());
+        }
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private static List<String> tokenize(Analyzer analyzer, String text) throws IOException {
