@@ -11,9 +11,10 @@ which greatly improves recall for Polish-language searches — e.g. "kotów",
 ## Requirements
 
 | Plugin version | OpenSearch | Java  |
-|---------------|-----------|-------|
-| 3.5.x         | 3.5.x     | 21+   |
-| 3.4.x         | 3.4.x     | 21+   |
+|----------------|------------|-------|
+| 3.6.x          | 3.6.x      | 21+   |
+| 3.5.x          | 3.5.x      | 21+   |
+| 3.4.x          | 3.4.x      | 21+   |
 
 ## Install
 
@@ -21,16 +22,16 @@ which greatly improves recall for Polish-language searches — e.g. "kotów",
 
 ```bash
 opensearch-plugin install \
-  https://github.com/Ksawierek/opensearch-analysis-morfologik/releases/download/3.5.0/opensearch-analysis-morfologik-3.5.0.zip
+  https://github.com/Ksawierek/opensearch-analysis-morfologik/releases/download/3.6.0/opensearch-analysis-morfologik-3.6.0.zip
 ```
 
 ### Dockerfile / Containerfile
 
 ```dockerfile
-FROM opensearchproject/opensearch:3.5.0
+FROM opensearchproject/opensearch:3.6.0
 
 RUN opensearch-plugin install \
-  https://github.com/Ksawierek/opensearch-analysis-morfologik/releases/download/3.5.0/opensearch-analysis-morfologik-3.5.0.zip
+  https://github.com/Ksawierek/opensearch-analysis-morfologik/releases/download/3.6.0/opensearch-analysis-morfologik-3.6.0.zip
 ```
 
 ## Usage
